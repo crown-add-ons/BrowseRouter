@@ -32,7 +32,7 @@ public class Program
       return;
     }
 
-    new ElevationService().RequireAdmin();
+    //new ElevationService().RequireAdmin(); // TODO - resolve the issue this line causes
 
     if (string.Equals(a, "register", StringComparison.OrdinalIgnoreCase))
     {

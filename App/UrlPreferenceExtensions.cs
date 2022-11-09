@@ -1,14 +1,38 @@
 ﻿using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace BrowseRouter;
 
 public static class UrlPreferenceExtensions
 {
-  public static bool TryGetPreference(this IEnumerable<UrlPreference> prefs, Uri uri, out UrlPreference pref)
+
+    [DllImport("user32.dll")]
+    static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    static extern int GetWindowText(IntPtr hwnd, StringBuilder ss, int count);
+
+    private static string ActiveWindowTitle()
+    {
+        //Create the variable
+        const int nChar = 256;
+        StringBuilder ss = new StringBuilder(nChar);
+
+        //Run GetForeGroundWindows and get active window informations
+        //assign them into handle pointer variable
+        IntPtr handle = IntPtr.Zero;
+        handle = GetForegroundWindow();
+
+        if (GetWindowText(handle, ss, nChar) > 0) return ss.ToString() + " ";
+        else return "";
+    }
+
+    public static bool TryGetPreference(this IEnumerable<UrlPreference> prefs, Uri uri, out UrlPreference pref)
   {
     pref = prefs.FirstOrDefault(pref =>
     {
       (string domain, string pattern) = pref.GetDomainAndPattern(uri);
+        domain = ActiveWindowTitle() + domain;
       return Regex.IsMatch(domain, pattern);
     })!;
 
